@@ -7,13 +7,3 @@
 
 QGL_LOGGER_OBJECT_DEFINE(QGL);
 // QGL_LOGGER_OBJECT_DEFINE(QGL::QtGllogger);
-
-
-
-
-
-
-
-
-
-
