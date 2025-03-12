@@ -16,6 +16,29 @@
 #endif
 
 
+#define QGL_LOGGER_OBJECT_EXTERN extern QGL::QtGllogger &qgl; // 对于命名空间
+#define QGL_LOGGER_OBJECT_STATIC static QGL::QtGllogger &qgl; // 对于类
+#define QGL_LOGGER_OBJECT_DEFINE(moduleName) QGL::QtGllogger &moduleName::qgl = QGL::_QGL_GET_LOGGER(moduleName);
+
+#define QGL_LOGGER_OBJECT_DEFINE_FOR_FILE \
+    const QString &_qgl_file_full_path = QStringLiteral(__FILE__); \
+    qint32 _qgl_file_name_length = _qgl_file_full_path.length() - _qgl_file_full_path.lastIndexOf(QRegExp(QStringLiteral("[/\\\\]"))) - 1; \
+    if (_qgl_file_name_length <= 0) { \
+        _qgl_file_name_length = 0; \
+    } \
+    QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger(_qgl_file_full_path.right(_qgl_file_name_length));
+
+#define _QGL_LOG_EXTINFO_FUNCTION_NAME QString::fromStdString(std::string(__func__))  // 附加函数名称
+#define _QGL_LOG_EXTINFO_LINE_NUMBER QString::fromStdString(std::to_string(__LINE__)) // 行数
+#define QGL_DEBUG(...) qgl.debug_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
+#define QGL_INFO(...) qgl.info_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
+#define QGL_WARNING(...) qgl.warning_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
+#define QGL_ERROR(...) qgl.error_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
+// ;logger.blank(LOG::Level::Info)
+
+#define _QGL_GET_LOGGER(moduleName) QtGllogger::getLogger(#moduleName)
+
+
 // 注意宏是在预处理阶段展开, 写在命名空间里也限制不了作用域
 #define QGL_LINE_LINE_BEGIN \
     QGL::qgl.blank(); \
@@ -78,6 +101,8 @@
 #define QGL_C2D_FAS(attrible) \
     d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
     d.quote() << attrible
+
+#define QGL_FAS(var) qUtf8Printable(QString(#var "=%1").arg(var))
 
 
 #define QGL_ENUM_TO_STRING(EnumType, i) QGL::e2s(i, #EnumType)
