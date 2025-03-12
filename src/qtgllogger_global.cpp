@@ -5,8 +5,7 @@
 
 namespace QGL {
 
+}
+
 
 QGL_ENUM_TO_STRING_SPECIAL(QGL::Level) // 特化模板的实现
-
-
-}
