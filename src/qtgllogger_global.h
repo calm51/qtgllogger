@@ -67,7 +67,7 @@
         } \
         debug.space(); \
         return debug; \
-    }
+};
 
 #define QGL_E2D_BIT(EnumType, ...) \
     QDebug operator<<(QDebug debug, const EnumType &value) { \
@@ -84,7 +84,7 @@
         debug.nospace() << enumName << "::??"; \
         debug.space(); \
         return debug; \
-    }
+};
 
 
 // 使类可以被qdebug打印,也打印对象的属性
@@ -97,7 +97,7 @@
         d.nospace() << ")"; \
         d.space(); \
         return d; \
-    }
+};
 #define QGL_C2D_FAS(attrible) \
     d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
     d.quote() << attrible
@@ -110,7 +110,7 @@
     template<> \
     QString QGL::e2s(const EnumType &i) { \
         return QGL_ENUM_TO_STRING(EnumType, i); \
-    }
+};
 
 namespace QGL {
 
