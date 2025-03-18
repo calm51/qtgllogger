@@ -35,6 +35,13 @@ class QTGLLOGGER_EXPORT QtGllogger {
         }
         return *loggers[module];
     }
+    static QtGllogger &getLogger_for_file(const QString &filepath, const qint32 &file_tree_level) {
+        QStringList sl = filepath.split(QRegExp(QStringLiteral("[/\\\\]+")));
+        while (sl.length() > file_tree_level) {
+            sl.removeFirst();
+        }
+        return getLogger(sl.join("/"));
+    }
     explicit QtGllogger(); // qmap的[]操作需要声明个默认构造
 
     // QGL_LOGGER_OBJECT_STATIC
@@ -51,6 +58,38 @@ class QTGLLOGGER_EXPORT QtGllogger {
             return;
         }
         qDebug() << "";
+    }
+
+    void line(Level level = Level::Debug) {
+        if (level < logLevel || level < globalLogLevel) {
+            return;
+        }
+        if (module.isEmpty()) {
+            return;
+        }
+        qDebug() << QStringLiteral("===============================================");
+    }
+
+    template<typename... Args>
+    void trace(Args &&...args) {
+        if (Level::Trace < logLevel || Level::Trace < globalLogLevel) {
+            return;
+        }
+        if (module.isEmpty()) {
+            return;
+        }
+        log(header(Level::Trace).quote().space(), std::forward<Args>(args)...);
+    }
+
+    template<typename... Args>
+    void trace_ext(const QStringList &extinfos, Args &&...args) {
+        if (Level::Trace < logLevel || Level::Trace < globalLogLevel) {
+            return;
+        }
+        if (module.isEmpty()) {
+            return;
+        }
+        log(header(Level::Trace, extinfos).quote().space(), std::forward<Args>(args)...);
     }
 
     template<typename... Args>
@@ -143,7 +182,7 @@ class QTGLLOGGER_EXPORT QtGllogger {
 
 
     QString module;
-    Level logLevel = Level::Debug;
+    Level logLevel = Level::Trace;
 
   private:
     explicit QtGllogger(const QString &moduleName);

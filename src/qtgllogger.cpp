@@ -10,7 +10,7 @@
 namespace QGL {
 
 
-Level globalLogLevel = Level::Debug;
+Level globalLogLevel = Level::Trace;
 void setGlobalLogLevel(Level level) {
     globalLogLevel = level;
 }
@@ -19,21 +19,23 @@ QMap<QString, QtGllogger *> loggers;
 
 
 QtGllogger::~QtGllogger() {
-    // qDebug()<<"析构"<<this->module;
+    // qDebug() << "析构" << this->module;
     if (!this->module.isEmpty() && this->module != QStringLiteral("QGL")) {
         qgl.debug("~析构", this);
     }
 }
 QtGllogger::QtGllogger() {
-    // qDebug()<<"默认构造"<<this->module;
+    // qDebug() << "默认构造" << this->module;
 }
 QtGllogger::QtGllogger(const QString &moduleName)
     : module(moduleName) {
-    // qDebug()<<"构造"<<this->module;
+    // qDebug() << "构造" << this->module;
 }
 
 QString QtGllogger::logLevelToString(Level level) const {
     switch (level) {
+    case Level::Trace:
+        return "T";
     case Level::Debug:
         return "D";
     case Level::Info:
@@ -53,7 +55,7 @@ QString QtGllogger::logLevelToString(Level level) const {
 } // namespace QGL
 
 
-QGL_E2D(QGL::Level, "Debug", "Info", "Warning", "Error", "Critical")
+QGL_E2D(QGL::Level, "Trace", "Debug", "Info", "Warning", "Error", "Critical")
 
 
 QGL_C2D(QGL::QtGllogger, QGL_C2D_FAS(o.module); QGL_C2D_FAS(o.logLevel))

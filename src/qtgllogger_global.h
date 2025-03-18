@@ -20,16 +20,37 @@
 #define QGL_LOGGER_OBJECT_STATIC static QGL::QtGllogger &qgl; // 对于类
 #define QGL_LOGGER_OBJECT_DEFINE(moduleName) QGL::QtGllogger &moduleName::qgl = QGL::_QGL_GET_LOGGER(moduleName);
 
-#define QGL_LOGGER_OBJECT_DEFINE_FOR_FILE \
-    const QString &_qgl_file_full_path = QStringLiteral(__FILE__); \
-    qint32 _qgl_file_name_length = _qgl_file_full_path.length() - _qgl_file_full_path.lastIndexOf(QRegExp(QStringLiteral("[/\\\\]"))) - 1; \
-    if (_qgl_file_name_length <= 0) { \
-        _qgl_file_name_length = 0; \
-    } \
-    QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger(_qgl_file_full_path.right(_qgl_file_name_length));
+// #define QGL_LOGGER_OBJECT_DEFINE_FOR_FILE \
+//     const QString &_qgl_file_full_path = QStringLiteral(__FILE__); \
+//     qint32 _qgl_file_name_length = _qgl_file_full_path.length() - _qgl_file_full_path.lastIndexOf(QRegExp(QStringLiteral("[/\\\\]"))) - 1; \
+//     if (_qgl_file_name_length <= 0) { \
+//         _qgl_file_name_length = 0; \
+//     } \
+//     QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger(_qgl_file_full_path.right(_qgl_file_name_length));
+// #define QGL_LOGGER_OBJECT_DEFINE_FOR_OTHER_FILE_PAER1 QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger("");
+// // #ifndef QGL_LOGGER_OBJECT_DEFINE_FOR_OTHER_FILE_PAER2
+// #define QGL_LOGGER_OBJECT_DEFINE_FOR_OTHER_FILE_PAER2 \
+//     class _qgl_temp_class_for_creating { \
+//       public: \
+//         _qgl_temp_class_for_creating() { \
+//             const QString &_qgl_file_full_path = QStringLiteral(__FILE__); \
+//             qint32 _qgl_file_name_length = _qgl_file_full_path.length() - _qgl_file_full_path.lastIndexOf(QRegExp(QStringLiteral("[/\\\\]"))) - 1; \
+//             if (_qgl_file_name_length <= 0) { \
+//                 _qgl_file_name_length = 0; \
+//             } \
+//             qgl = QGL::QtGllogger::getLogger(_qgl_file_full_path.right(_qgl_file_name_length)); \
+//         } \
+//     }; \
+//     static _qgl_temp_class_for_creating _qgl_temp_class;
+// // #endif
+#define QGL_LOGGER_OBJECT_DEFINE_FOR_FILE(fileTreeLevel) QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger_for_file(__FILE__, fileTreeLevel);
+#define QGL_LOGGER_OBJECT_DEFINE_STATIC_FOR_FILE(fileTreeLevel) \
+    static QGL::QtGllogger &qgl = QGL::QtGllogger::getLogger_for_file(__FILE__, fileTreeLevel); // 只能加在cpp文件里,写在头文件里会导致重定义
+
 
 #define _QGL_LOG_EXTINFO_FUNCTION_NAME QString::fromStdString(std::string(__func__))  // 附加函数名称
 #define _QGL_LOG_EXTINFO_LINE_NUMBER QString::fromStdString(std::to_string(__LINE__)) // 行数
+#define QGL_TRACE(...) qgl.trace_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
 #define QGL_DEBUG(...) qgl.debug_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
 #define QGL_INFO(...) qgl.info_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
 #define QGL_WARNING(...) qgl.warning_ext(QStringList{_QGL_LOG_EXTINFO_FUNCTION_NAME, _QGL_LOG_EXTINFO_LINE_NUMBER}, __VA_ARGS__)
@@ -40,11 +61,11 @@
 
 
 // 注意宏是在预处理阶段展开, 写在命名空间里也限制不了作用域
-#define QGL_LINE_LINE_BEGIN \
-    QGL::qgl.blank(); \
-    QGL::qgl.blank(); \
-    QGL::qgl.debug(QStringLiteral("==============================================="));
-#define QGL_LINE_LINE_END QGL::qgl.debug(QStringLiteral("==============================================="));
+#define QGL_LINE_LINE_BEGIN(level) \
+    QGL::qgl.blank(level); \
+    QGL::qgl.blank(level); \
+    QGL::qgl.line(level);
+#define QGL_LINE_LINE_END(level) QGL::qgl.line(level);
 
 
 // 预特化一下,避免需要同时传类型和值
@@ -67,7 +88,7 @@
         } \
         debug.space(); \
         return debug; \
-};
+    };
 
 #define QGL_E2D_BIT(EnumType, ...) \
     QDebug operator<<(QDebug debug, const EnumType &value) { \
@@ -84,7 +105,7 @@
         debug.nospace() << enumName << "::??"; \
         debug.space(); \
         return debug; \
-};
+    };
 
 
 // 使类可以被qdebug打印,也打印对象的属性
@@ -92,12 +113,12 @@
 #define QGL_C2D(Class, ...) \
     QDebug operator<<(QDebug d, const Class &o) { \
         QDebugStateSaver saver(d); \
-        d.nospace() << #Class "(" << &o; \
+        d.nospace() << #Class "(" << static_cast<const void *>(&o); \
         __VA_ARGS__; \
         d.nospace() << ")"; \
         d.space(); \
         return d; \
-};
+    };
 #define QGL_C2D_FAS(attrible) \
     d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
     d.quote() << attrible
@@ -110,7 +131,7 @@
     template<> \
     QString QGL::e2s(const EnumType &i) { \
         return QGL_ENUM_TO_STRING(EnumType, i); \
-};
+    };
 
 namespace QGL {
 
@@ -118,7 +139,7 @@ Q_NAMESPACE
 
 typedef QPair<quint32, QString> eban; // enum bit and name
 
-enum class QTGLLOGGER_EXPORT Level { Debug, Info, Warning, Error, Critical };
+enum class QTGLLOGGER_EXPORT Level { Trace, Debug, Info, Warning, Error, Critical };
 Q_ENUM_NS(Level)
 
 
