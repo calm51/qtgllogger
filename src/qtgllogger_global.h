@@ -101,7 +101,7 @@
                 debug.space(); \
                 return debug; \
             } \
-        } \
+        }; \
         debug.nospace() << enumName << "::??"; \
         debug.space(); \
         return debug; \
