@@ -118,6 +118,10 @@
         d.nospace() << ")"; \
         d.space(); \
         return d; \
+    }; \
+    QDebug operator<<(QDebug d, const Class *o) { \
+        d << *o; \
+        return d; \
     };
 #define QGL_C2D_FAS(attrible) \
     d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
