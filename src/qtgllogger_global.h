@@ -1,4 +1,4 @@
-#pragma execution_character_set("utf-8")
+﻿#pragma execution_character_set("utf-8")
 
 #ifndef QTGLLOGGER_GLOBAL_H
 #define QTGLLOGGER_GLOBAL_H
@@ -127,6 +127,14 @@
     d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
     d.quote() << attrible
 
+#define QGL_C2D_FAD(attrible) \
+    d.nospace().noquote() << ", " << QStringLiteral(#attrible).mid(2) << "="; \
+    d.quote() << attrible
+
+#define QGL_FAD(attrible) \
+    d.nospace().noquote() << ", " << QStringLiteral(#attrible) << "="; \
+    d.quote() << attrible
+
 #define QGL_FAS(var) qUtf8Printable(QString(#var "=%1").arg(var))
 
 
@@ -143,7 +151,7 @@ Q_NAMESPACE
 
 typedef QPair<quint32, QString> eban; // enum bit and name
 
-enum class QTGLLOGGER_EXPORT Level { Trace, Debug, Info, Warning, Error, Critical };
+enum class Level { Trace, Debug, Info, Warning, Error, Critical };
 Q_ENUM_NS(Level)
 
 
@@ -162,7 +170,7 @@ template<typename EnumType>
 QString e2s_lastpart(const EnumType &i) {
     const QString &fullname = QGL::e2s(i);
     return fullname.mid(fullname.lastIndexOf("::") + 2);
-}
+};
 template<> // 特化模板声明, 实现要写到cpp文件里
 QTGLLOGGER_EXPORT QString e2s(const QGL::Level &i);
 

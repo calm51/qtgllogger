@@ -1,4 +1,4 @@
-#pragma execution_character_set("utf-8")
+﻿#pragma execution_character_set("utf-8")
 
 #ifndef QTGLLOGGER_H
 #define QTGLLOGGER_H
